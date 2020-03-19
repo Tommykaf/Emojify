@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Emojify</string>
+    <string name="emojify_context_menu">Emojify Context Menu</string>
+</resources>
