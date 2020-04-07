@@ -1,7 +1,10 @@
 package com.changethislater.emojify;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -10,6 +13,7 @@ import android.widget.TextView;
 import com.changethislater.emojify.utils.ReplacementRule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -19,10 +23,12 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
 
     private List<ReplacementRule> options;
     private List<OptionViewHolder> viewHolders;
+    private Activity origin;
 
-    public OptionAdapter(List<ReplacementRule> options) {
+    public OptionAdapter(List<ReplacementRule> options, Activity origin) {
         this.options = options;
         this.viewHolders = new ArrayList<>();
+        this.origin = origin;
 
     }
 
@@ -34,6 +40,12 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
         LayoutInflater inflater = LayoutInflater.from(context);
         LinearLayout view = (LinearLayout) inflater.inflate(layoutForItem, parent, false);
         OptionViewHolder viewHolder =  new OptionViewHolder(view);
+        viewHolder.itemView.setOnTouchListener((v, event) -> {
+            if(event.getActionMasked()== MotionEvent.ACTION_DOWN){
+                ((EmojifyContextMenu)origin).startDragging(viewHolder);
+            }
+            return true;
+        });
         viewHolders.add(viewHolder);
         return viewHolder;
     }
@@ -48,15 +60,22 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
         return options.size();
     }
 
-    public String switcheroo(CharSequence input){
+    public void moveItem(int from, int to){
+        Collections.swap(options,from,to);
+        Collections.swap(viewHolders,from,to);
+    }
+
+    public String applyOptions(CharSequence input) {
         String result = input.toString();
         for (int i = 0; i < options.size(); i++) {
-            if(viewHolders.get(i).isChecked()) {
+            if (viewHolders.get(i).isChecked()) {
                 result = options.get(i).apply(result);
             }
         }
+        Log.d("result","result is "+result);
         return result;
     }
+
 
     class OptionViewHolder extends RecyclerView.ViewHolder {
         private LinearLayout view;
@@ -74,8 +93,6 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
         public boolean isChecked() {
             return this.checkBox.isChecked();
         }
-
-        //TODO: ADD ONCLICK
 
     }
 }

@@ -6,21 +6,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.changethislater.emojify.utils.ReplacementRule;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.arch.core.util.Function;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class EmojifyContextMenu extends Activity {
 
@@ -28,23 +28,37 @@ public class EmojifyContextMenu extends Activity {
     private RecyclerView optionRecyclerView;
     private RecyclerView.Adapter optionListAdapter;
     private TextView sampledTextView;
-    //private Map<String, Function<String,String>> optionList;
     private List<ReplacementRule> optionList;
+    private ItemTouchHelper mIth;
     private CharSequence text;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         optionList = new ArrayList<>();
-        optionList.add(new ReplacementRule("\uD83D\uDC4F",(String s) -> s.replaceAll(" ","\uD83D\uDC4F")));
-        optionList.add(new ReplacementRule("\uD83C\uDD71",(String s) -> s.replaceAll("nigg","ni\uD83C\uDD71\uD83C\uDD71")));
-        optionList.add(new ReplacementRule("\uD83D\uDE02",(String s) -> {
-            String res = s.replaceAll("lol","\uD83D\uDE02");
-            res = res.replaceAll("LOL","\uD83D\uDE02");
+        optionList.add(new ReplacementRule("\uD83D\uDC4F", (String s) -> s.replaceAll(" ", "\uD83D\uDC4F")));
+        optionList.add(new ReplacementRule("\uD83C\uDD71", (String s) -> {
+            String res = s.replaceAll("g", "\uD83C\uDD71");
+            res = res.replaceAll("G", "\uD83C\uDD71");
+            res = res.replaceAll("b", "\uD83C\uDD71");
+            res = res.replaceAll("B", "\uD83C\uDD71");
             return res;
         }));
-        optionList.add(new ReplacementRule("\uD83E\uDD23",(String s) -> s.replaceAll("rofl","\uD83E\uDD23")));
+
+        optionList.add(new ReplacementRule("\uD83D\uDE02", (String s) -> {
+            String res = s.replaceAll("lol", "\uD83D\uDE02");
+            res = res.replaceAll("LOL", "\uD83D\uDE02");
+            res = res.replaceAll("Lol", "\uD83D\uDE02");
+            return res;
+        }));
+        optionList.add(new ReplacementRule("\uD83E\uDD23",(String s) -> {
+            String res = s.replaceAll("rofl", "\uD83E\uDD23");
+            res = res.replaceAll("Rofl", "\uD83E\uDD23");
+            res = res.replaceAll("ROFL", "\uD83E\uDD23\uD83E\uDD23");
+            return res;
+        }));
         initView();
         //fetchText();
     }
@@ -60,16 +74,60 @@ public class EmojifyContextMenu extends Activity {
 
         optionRecyclerView = findViewById(R.id.optionRecyclerView);
         optionRecyclerView.setHasFixedSize(true);
-        optionLayoutManager = new LinearLayoutManager(this,RecyclerView.VERTICAL, false);
+        optionLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         optionRecyclerView.setLayoutManager(optionLayoutManager);
-        optionListAdapter = new OptionAdapter(this.optionList);
+        optionListAdapter = new OptionAdapter(this.optionList,this);
         optionRecyclerView.setAdapter(optionListAdapter);
 
+        mIth = new ItemTouchHelper(
+                new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                        0) {
+                    public boolean onMove(@NonNull RecyclerView recyclerView,
+                                          @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
+                        final int fromPos = viewHolder.getAdapterPosition();
+                        final int toPos = target.getAdapterPosition();
+
+                        ((OptionAdapter) optionListAdapter).moveItem(fromPos, toPos);
+                        optionListAdapter.notifyItemMoved(fromPos, toPos);
+                        return true;
+                    }
+
+                    @Override
+                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+                    }
+
+
+                    @Override
+                    public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+                        super.onSelectedChanged(viewHolder, actionState);
+                        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                            assert viewHolder != null;
+                            viewHolder.itemView.setAlpha(0.5f);
+                        }
+                    }
+
+                    @Override
+                    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                        super.clearView(recyclerView, viewHolder);
+                        viewHolder.itemView.setAlpha(1.0f);
+                    }
+
+
+                });
+
+        mIth.attachToRecyclerView(optionRecyclerView);
         boolean fetched = fetchText();
-        if(fetched) {
+        if (fetched) {
             sampledTextView = findViewById(R.id.sampledTextView);
             sampledTextView.setText(text);
         }
+
+    }
+
+    public void startDragging(RecyclerView.ViewHolder viewHolder){
+        mIth.startDrag(viewHolder);
     }
 
     protected boolean fetchText() {
@@ -79,33 +137,39 @@ public class EmojifyContextMenu extends Activity {
         boolean readonly = getIntent()
                 .getBooleanExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, false);
 
-//        if (readonly) {
-//            Context context = getApplicationContext();
-//            CharSequence text = "Text is read only";
-//            int duration = Toast.LENGTH_SHORT;
-//            Toast.makeText(context, text, duration).show();
-//            finish();
-//            return false;
-//        }else{
-//            return true;
-//        }
-        return true;
+        if (readonly) {
+            Context context = getApplicationContext();
+            CharSequence text = "Text is read only";
+            int duration = Toast.LENGTH_LONG;
+            Toast.makeText(context, text, duration).show();
+            finish();
+            return false;
+        } else {
+            return true;
+        }
+
     }
 
-    private void confirm(String result) {
-        Intent intent = new Intent();
-        intent.putExtra(Intent.EXTRA_PROCESS_TEXT, result);
-        setResult(RESULT_OK, intent);
+
+
+    public void cancel(View view) {
+        if(view instanceof Button){
+            if (((Button) view).getText().toString().toLowerCase().equals("cancel")){
+                Intent intent = getIntent();
+                intent.putExtra(Intent.EXTRA_PROCESS_TEXT, text);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        }
     }
 
     public void OKButton(View view) {
-        String result = ((OptionAdapter) optionListAdapter).switcheroo(text);
-        //String result = ((OptionAdapter) Objects.requireNonNull(optionRecyclerView.getAdapter())).switcheroo(text);
-        Log.d("result",result);
+        String result = ((OptionAdapter)optionListAdapter).applyOptions(text);
+        Log.d("result", result);
 
-        Intent intent = new Intent();
+        Intent intent = getIntent();
         intent.putExtra(Intent.EXTRA_PROCESS_TEXT, result);
         setResult(RESULT_OK, intent);
-        //finish();
+        finish();
     }
 }

@@ -13,7 +13,8 @@
         android:id="@+id/checkBox"
         android:layout_width="30dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        />
 
     <Space
         android:layout_width="20dp"
@@ -25,5 +26,5 @@
         android:layout_width="348dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="TextView" />
+        android:text="@string/optionTextViewStr" />
 </LinearLayout>
