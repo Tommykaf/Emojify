@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.changethislater.emojify.utils.ReplacementRule;
+
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,21 +28,23 @@ public class EmojifyContextMenu extends Activity {
     private RecyclerView optionRecyclerView;
     private RecyclerView.Adapter optionListAdapter;
     private TextView sampledTextView;
-    private Map<String, Function<String,String>> optionList;
+    //private Map<String, Function<String,String>> optionList;
+    private List<ReplacementRule> optionList;
     private CharSequence text;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        optionList = new HashMap<>();
-        optionList.put("\uD83D\uDC4F",(String s) -> s.replaceAll(" ","\uD83D\uDC4F"));
-        optionList.put("\uD83C\uDD71",(String s) -> s.replaceAll("nigg","ni\uD83C\uDD71\uD83C\uDD71"));
-        optionList.put("\uD83D\uDE02",(String s) -> {
+        
+        optionList = new ArrayList<>();
+        optionList.add(new ReplacementRule("\uD83D\uDC4F",(String s) -> s.replaceAll(" ","\uD83D\uDC4F")));
+        optionList.add(new ReplacementRule("\uD83C\uDD71",(String s) -> s.replaceAll("nigg","ni\uD83C\uDD71\uD83C\uDD71")));
+        optionList.add(new ReplacementRule("\uD83D\uDE02",(String s) -> {
             String res = s.replaceAll("lol","\uD83D\uDE02");
             res = res.replaceAll("LOL","\uD83D\uDE02");
             return res;
-        });
-        optionList.put("\uD83E\uDD23",(String s) -> s.replaceAll("rofl","\uD83E\uDD23"));
+        }));
+        optionList.add(new ReplacementRule("\uD83E\uDD23",(String s) -> s.replaceAll("rofl","\uD83E\uDD23")));
         initView();
         //fetchText();
     }
@@ -75,15 +79,17 @@ public class EmojifyContextMenu extends Activity {
         boolean readonly = getIntent()
                 .getBooleanExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, false);
 
-        if (readonly) {
-            Context context = getApplicationContext();
-            CharSequence text = "Text is read only";
-            int duration = Toast.LENGTH_SHORT;
-            Toast.makeText(context, text, duration).show();
-            return false;
-        }else{
-            return true;
-        }
+//        if (readonly) {
+//            Context context = getApplicationContext();
+//            CharSequence text = "Text is read only";
+//            int duration = Toast.LENGTH_SHORT;
+//            Toast.makeText(context, text, duration).show();
+//            finish();
+//            return false;
+//        }else{
+//            return true;
+//        }
+        return true;
     }
 
     private void confirm(String result) {
@@ -100,6 +106,6 @@ public class EmojifyContextMenu extends Activity {
         Intent intent = new Intent();
         intent.putExtra(Intent.EXTRA_PROCESS_TEXT, result);
         setResult(RESULT_OK, intent);
-        finish();
+        //finish();
     }
 }

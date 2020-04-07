@@ -1,31 +1,29 @@
 package com.changethislater.emojify;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.arch.core.util.Function;
-import androidx.recyclerview.widget.RecyclerView;
+import com.changethislater.emojify.utils.ReplacementRule;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionViewHolder> {
 
-    public Map<String, Function<String,String>> options;
+    private List<ReplacementRule> options;
     private List<OptionViewHolder> viewHolders;
 
-    public OptionAdapter(Map<String, Function<String,String>> options) {
+    public OptionAdapter(List<ReplacementRule> options) {
         this.options = options;
         this.viewHolders = new ArrayList<>();
+
     }
 
     @NonNull
@@ -42,14 +40,7 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
 
     @Override
     public void onBindViewHolder(@NonNull OptionViewHolder holder, int position) {
-        Set<Map.Entry<String, Function<String,String>>> ress = options.entrySet();
-        int counter = 0;
-        Iterator<Map.Entry<String, Function<String,String>>> it = ress.iterator();
-        while(counter < position){
-            it.next();
-            counter++;
-        }
-        ((TextView) holder.view.findViewById(R.id.optText)).setText(it.next().getKey());
+        ((TextView) holder.view.findViewById(R.id.optText)).setText(options.get(position).getName());
     }
 
     @Override
@@ -58,22 +49,13 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
     }
 
     public String switcheroo(CharSequence input){
-        Log.d("yes123",input.toString());
-        List<Function<String,String>> operations = new ArrayList<>();
-        for(OptionViewHolder viewHolder : viewHolders){
-            if(viewHolder.isChecked()){
-                String name = (String) ((TextView)viewHolder.view.findViewById(R.id.optText)).getText();
-                if(options.containsKey(name)){
-                    operations.add(options.get(name));
-                }
-
+        String result = input.toString();
+        for (int i = 0; i < options.size(); i++) {
+            if(viewHolders.get(i).isChecked()) {
+                result = options.get(i).apply(result);
             }
         }
-        String forFunc = input.toString();
-        for(Function<String,String> stringFunction : operations){
-            forFunc = stringFunction.apply(forFunc);
-        }
-        return forFunc;
+        return result;
     }
 
     class OptionViewHolder extends RecyclerView.ViewHolder {
@@ -93,7 +75,7 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
             return this.checkBox.isChecked();
         }
 
-
+        //TODO: ADD ONCLICK
 
     }
 }
