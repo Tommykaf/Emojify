@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class EmojifyContextMenu extends Activity {
 
@@ -53,12 +54,31 @@ public class EmojifyContextMenu extends Activity {
             res = res.replaceAll("Lol", "\uD83D\uDE02");
             return res;
         }));
-        optionList.add(new ReplacementRule("\uD83E\uDD23",(String s) -> {
+        optionList.add(new ReplacementRule("\uD83E\uDD23", (String s) -> {
             String res = s.replaceAll("rofl", "\uD83E\uDD23");
             res = res.replaceAll("Rofl", "\uD83E\uDD23");
             res = res.replaceAll("ROFL", "\uD83E\uDD23\uD83E\uDD23");
             return res;
         }));
+        new ReplacementRule("I NeEd hEaLtHcArE bEcAuSe", (String s) -> {
+            Random random = new Random();
+            random.setSeed(System.currentTimeMillis());
+            char[] letters = s.toCharArray();
+            StringBuilder res = new StringBuilder();
+            for (char letter : letters) {
+                if (Character.isAlphabetic(letter) && random.nextDouble() < 0.35) {
+                    if (Character.isUpperCase(letter)) {
+                        res.append(letter + 32);
+                    }
+                    if (Character.isLowerCase(letter)) {
+                        res.append(letter - 32);
+                    }
+                } else {
+                    res.append(letter);
+                }
+            }
+            return res.toString();
+        });
         initView();
         //fetchText();
     }
@@ -76,7 +96,7 @@ public class EmojifyContextMenu extends Activity {
         optionRecyclerView.setHasFixedSize(true);
         optionLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         optionRecyclerView.setLayoutManager(optionLayoutManager);
-        optionListAdapter = new OptionAdapter(this.optionList,this);
+        optionListAdapter = new OptionAdapter(this.optionList, this);
         optionRecyclerView.setAdapter(optionListAdapter);
 
         mIth = new ItemTouchHelper(
@@ -126,7 +146,7 @@ public class EmojifyContextMenu extends Activity {
 
     }
 
-    public void startDragging(RecyclerView.ViewHolder viewHolder){
+    public void startDragging(RecyclerView.ViewHolder viewHolder) {
         mIth.startDrag(viewHolder);
     }
 
@@ -151,10 +171,9 @@ public class EmojifyContextMenu extends Activity {
     }
 
 
-
     public void cancel(View view) {
-        if(view instanceof Button){
-            if (((Button) view).getText().toString().toLowerCase().equals("cancel")){
+        if (view instanceof Button) {
+            if (((Button) view).getText().toString().toLowerCase().equals("cancel")) {
                 Intent intent = getIntent();
                 intent.putExtra(Intent.EXTRA_PROCESS_TEXT, text);
                 setResult(RESULT_OK, intent);
@@ -164,7 +183,7 @@ public class EmojifyContextMenu extends Activity {
     }
 
     public void OKButton(View view) {
-        String result = ((OptionAdapter)optionListAdapter).applyOptions(text);
+        String result = ((OptionAdapter) optionListAdapter).applyOptions(text);
         Log.d("result", result);
 
         Intent intent = getIntent();
