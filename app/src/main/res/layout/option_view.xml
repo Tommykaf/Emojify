@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="40dp">
 
+
+    <Space
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
 
     <CheckBox
         android:id="@+id/checkBox"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <Space
         android:layout_width="20dp"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/optText"
         android:layout_width="348dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
