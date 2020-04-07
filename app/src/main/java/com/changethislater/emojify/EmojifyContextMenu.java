@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,6 +95,7 @@ public class EmojifyContextMenu extends Activity {
 
                         ((OptionAdapter) optionListAdapter).moveItem(fromPos, toPos);
                         optionListAdapter.notifyItemMoved(fromPos, toPos);
+                        updateSampledTextView();
                         return true;
                     }
 
@@ -161,7 +163,7 @@ public class EmojifyContextMenu extends Activity {
                 result = optionList.get(i).apply(result);
             }
         }
-        Log.d("result","result is "+result);
+        Log.d("result","result is " + result);
         return result;
     }
 
@@ -184,5 +186,15 @@ public class EmojifyContextMenu extends Activity {
         intent.putExtra(Intent.EXTRA_PROCESS_TEXT, result);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    public void updateSampledTextView() {
+            this.sampledTextView.setText(this.applyOptions(this.text));
+    }
+
+    public void updateSampledTextView(View view) {
+        if (view instanceof CheckBox) {
+            updateSampledTextView();
+        }
     }
 }
