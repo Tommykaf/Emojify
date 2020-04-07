@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class EmojifyContextMenu extends Activity {
 
@@ -70,7 +71,25 @@ public class EmojifyContextMenu extends Activity {
             res = res.replaceAll("ROFL", "\uD83E\uDD23\uD83E\uDD23");
             return res;
         }));
-
+        ruleSet.add(new Rule("I NeEd hEaLtHcArE bEcAuSe", (String s) -> {
+            Random random = new Random();
+            random.setSeed(System.currentTimeMillis());
+            char[] letters = s.toCharArray();
+            StringBuilder res = new StringBuilder();
+            for (char letter : letters) {
+                if (Character.isAlphabetic(letter) && random.nextDouble() < 0.35) {
+                    if (Character.isUpperCase(letter)) {
+                        res.append((char)(letter + 32));
+                    }
+                    if (Character.isLowerCase(letter)) {
+                        res.append((char)(letter - 32));
+                    }
+                } else {
+                    res.append(letter);
+                }
+            }
+            return res.toString();
+        }));
         EmojifyContextMenu.optionList = ruleSet;
     }
 
@@ -163,7 +182,6 @@ public class EmojifyContextMenu extends Activity {
                 result = optionList.get(i).apply(result);
             }
         }
-        Log.d("result","result is " + result);
         return result;
     }
 
@@ -180,8 +198,6 @@ public class EmojifyContextMenu extends Activity {
 
     public void OKButton(View view) {
         String result = applyOptions(text);
-        Log.d("result", result);
-
         Intent intent = getIntent();
         intent.putExtra(Intent.EXTRA_PROCESS_TEXT, result);
         setResult(RESULT_OK, intent);

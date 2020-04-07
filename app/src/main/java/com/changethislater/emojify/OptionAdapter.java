@@ -41,6 +41,8 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
         viewHolder.itemView.setOnTouchListener((v, event) -> {
             if(event.getActionMasked()== MotionEvent.ACTION_DOWN){
                 ((EmojifyContextMenu)origin).startDragging(viewHolder);
+            }else if(event.getActionMasked() == MotionEvent.ACTION_UP){
+                v.performClick();
             }
             return true;
         });
