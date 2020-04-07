@@ -2,11 +2,11 @@ package com.changethislater.emojify.utils;
 
 import java.util.function.Function;
 
-public class ReplacementRule {
+public class Rule {
     String name;
     Function<String, String> replacement;
 
-    public ReplacementRule(String name, Function<String, String> replacement) {
+    public Rule(String name, Function<String, String> replacement) {
         setName(name);
         setReplacement(replacement);
     }

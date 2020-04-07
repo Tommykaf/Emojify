@@ -10,7 +10,7 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.changethislater.emojify.utils.ReplacementRule;
+import com.changethislater.emojify.utils.Rule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,12 +21,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionViewHolder> {
 
-    private List<ReplacementRule> options;
     private List<OptionViewHolder> viewHolders;
     private Activity origin;
 
-    public OptionAdapter(List<ReplacementRule> options, Activity origin) {
-        this.options = options;
+    public OptionAdapter(Activity origin) {
         this.viewHolders = new ArrayList<>();
         this.origin = origin;
 
@@ -54,28 +52,26 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.OptionView
 
     @Override
     public void onBindViewHolder(@NonNull OptionViewHolder holder, int position) {
-        ((TextView) holder.view.findViewById(R.id.optText)).setText(options.get(position).getName());
+        ((TextView) holder.view.findViewById(R.id.optText)).setText(EmojifyContextMenu.optionList.get(position).getName());
     }
 
     @Override
     public int getItemCount() {
-        return options.size();
+        return EmojifyContextMenu.optionList.size();
     }
 
     public void moveItem(int from, int to){
-        Collections.swap(options,from,to);
+        Collections.swap(EmojifyContextMenu.optionList,from,to);
         Collections.swap(viewHolders,from,to);
     }
 
-    public String applyOptions(CharSequence input) {
-        String result = input.toString();
-        for (int i = 0; i < options.size(); i++) {
-            if (viewHolders.get(i).isChecked()) {
-                result = options.get(i).apply(result);
-            }
-        }
-        Log.d("result","result is "+result);
-        return result;
+    /**
+     * Returns whether the i-th ViewHolder's CheckBox is Checked
+     * @param i index to check
+     *
+     */
+    public boolean isChecked(int i) {
+        return this.viewHolders.get(i).isChecked();
     }
 
 

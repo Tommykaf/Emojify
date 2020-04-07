@@ -7,11 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.changethislater.emojify.utils.ReplacementRule;
+import com.changethislater.emojify.utils.Rule;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,20 +26,31 @@ public class EmojifyContextMenu extends Activity {
 
     private LinearLayoutManager optionLayoutManager;
     private RecyclerView optionRecyclerView;
-    private RecyclerView.Adapter optionListAdapter;
+    private OptionAdapter optionListAdapter;
     private TextView sampledTextView;
-    private List<ReplacementRule> optionList;
     private ItemTouchHelper mIth;
     private CharSequence text;
 
+    public static List<Rule> optionList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initialiseRuleSet();
+        initView();
+        //fetchText();
+    }
 
-        optionList = new ArrayList<>();
-        optionList.add(new ReplacementRule("\uD83D\uDC4F", (String s) -> s.replaceAll(" ", "\uD83D\uDC4F")));
-        optionList.add(new ReplacementRule("\uD83C\uDD71", (String s) -> {
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        fetchText();
+    }
+
+    private static void initialiseRuleSet() {
+        List<Rule> ruleSet = new ArrayList<>();
+        ruleSet.add(new Rule("\uD83D\uDC4F", (String s) -> s.replaceAll(" ", "\uD83D\uDC4F")));
+        ruleSet.add(new Rule("\uD83C\uDD71", (String s) -> {
             String res = s.replaceAll("g", "\uD83C\uDD71");
             res = res.replaceAll("G", "\uD83C\uDD71");
             res = res.replaceAll("b", "\uD83C\uDD71");
@@ -48,13 +58,13 @@ public class EmojifyContextMenu extends Activity {
             return res;
         }));
 
-        optionList.add(new ReplacementRule("\uD83D\uDE02", (String s) -> {
+        ruleSet.add(new Rule("\uD83D\uDE02", (String s) -> {
             String res = s.replaceAll("lol", "\uD83D\uDE02");
             res = res.replaceAll("LOL", "\uD83D\uDE02");
             res = res.replaceAll("Lol", "\uD83D\uDE02");
             return res;
         }));
-        optionList.add(new ReplacementRule("\uD83E\uDD23", (String s) -> {
+        ruleSet.add(new Rule("\uD83E\uDD23",(String s) -> {
             String res = s.replaceAll("rofl", "\uD83E\uDD23");
             res = res.replaceAll("Rofl", "\uD83E\uDD23");
             res = res.replaceAll("ROFL", "\uD83E\uDD23\uD83E\uDD23");
@@ -81,12 +91,9 @@ public class EmojifyContextMenu extends Activity {
         });
         initView();
         //fetchText();
-    }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        fetchText();
+
+        EmojifyContextMenu.optionList = ruleSet;
     }
 
     private void initView() {
@@ -96,7 +103,7 @@ public class EmojifyContextMenu extends Activity {
         optionRecyclerView.setHasFixedSize(true);
         optionLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
         optionRecyclerView.setLayoutManager(optionLayoutManager);
-        optionListAdapter = new OptionAdapter(this.optionList, this);
+        optionListAdapter = new OptionAdapter(this);
         optionRecyclerView.setAdapter(optionListAdapter);
 
         mIth = new ItemTouchHelper(
@@ -146,7 +153,7 @@ public class EmojifyContextMenu extends Activity {
 
     }
 
-    public void startDragging(RecyclerView.ViewHolder viewHolder) {
+    public void startDragging(RecyclerView.ViewHolder viewHolder){
         mIth.startDrag(viewHolder);
     }
 
@@ -170,6 +177,16 @@ public class EmojifyContextMenu extends Activity {
 
     }
 
+    public String applyOptions(@NonNull CharSequence input) {
+        String result = input.toString();
+        for (int i = 0; i < optionList.size(); i++) {
+            if (optionListAdapter.isChecked(i)) {
+                result = optionList.get(i).apply(result);
+            }
+        }
+        Log.d("result","result is "+result);
+        return result;
+    }
 
     public void cancel(View view) {
         if (view instanceof Button) {
@@ -183,7 +200,7 @@ public class EmojifyContextMenu extends Activity {
     }
 
     public void OKButton(View view) {
-        String result = ((OptionAdapter) optionListAdapter).applyOptions(text);
+        String result = applyOptions(text);
         Log.d("result", result);
 
         Intent intent = getIntent();
