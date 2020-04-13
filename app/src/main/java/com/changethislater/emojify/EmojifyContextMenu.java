@@ -90,6 +90,23 @@ public class EmojifyContextMenu extends Activity {
             }
             return res.toString();
         }));
+        ruleSet.add(new Rule("UWU", (String s) -> {
+            Random random = new Random();
+            random.setSeed(System.currentTimeMillis());
+            String[] faces = {"(・`ω´・)", "OwO", "owo", "oωo", "òωó", "°ω°", "UwU", ">w<", "^w^", ";;w;;", "uwu", "סשס"};
+            s = s.replaceAll("[rl]", "w")
+                    .replaceAll("[RL]", "W")
+                    .replaceAll("n([aeiou])", "ny$1")
+                    .replaceAll("N([aeiou])", "Ny$1")
+                    .replaceAll("N([AEIOU])", "Ny$1");
+
+            long count = s.chars().filter(c -> c == '!').count();
+            for (int i = 0; i < count; i++) {
+                s = s.replaceFirst("!", " " + faces[random.nextInt(faces.length)] + " ");
+            }
+
+            return s;
+        }));
         EmojifyContextMenu.optionList = ruleSet;
     }
 
