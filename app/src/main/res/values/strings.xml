@@ -3,4 +3,5 @@
     <string name="emojify_context_menu">Emojify Context Menu</string>
     <string name="selection_text">BIGAIDS</string>
     <string name="optionTextViewStr">opt1</string>
+    <string name="rulesXML">Custom_Rules.xml</string>
 </resources>

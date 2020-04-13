@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.changethislater.emojify.utils.Rule;
+import com.changethislater.emojify.utils.SavedRulesManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,10 +34,12 @@ public class EmojifyContextMenu extends Activity {
     private CharSequence text;
 
     public static List<Rule> optionList;
+    private SavedRulesManager savedRulesManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.savedRulesManager = SavedRulesManager.getInstance(getApplicationContext());
         initialiseRuleSet();
         initView();
         //fetchText();
