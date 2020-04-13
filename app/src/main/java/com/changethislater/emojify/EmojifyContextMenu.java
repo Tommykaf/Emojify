@@ -20,6 +20,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -34,13 +37,14 @@ public class EmojifyContextMenu extends Activity {
     private CharSequence text;
 
     public static List<Rule> optionList;
-    private SavedRulesManager savedRulesManager;
+    private static SavedRulesManager savedRulesManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.savedRulesManager = SavedRulesManager.getInstance(getApplicationContext());
+        EmojifyContextMenu.savedRulesManager = SavedRulesManager.getInstance(getApplicationContext());
         initialiseRuleSet();
+
         initView();
         //fetchText();
     }
@@ -51,9 +55,17 @@ public class EmojifyContextMenu extends Activity {
         fetchText();
     }
 
-    private static void initialiseRuleSet() {
+    private void initialiseRuleSet() {
         List<Rule> ruleSet = new ArrayList<>();
+
+        try {
+            ruleSet = savedRulesManager.readRulesFromFile(getApplicationContext());
+        } catch (IOException | SAXException e) {
+            e.printStackTrace();
+        }
+
         ruleSet.add(new Rule("\uD83D\uDC4F", (String s) -> s.replaceAll(" ", "\uD83D\uDC4F")));
+
         ruleSet.add(new Rule("\uD83C\uDD71", (String s) -> {
             String res = s.replaceAll("g", "\uD83C\uDD71");
             res = res.replaceAll("G", "\uD83C\uDD71");
