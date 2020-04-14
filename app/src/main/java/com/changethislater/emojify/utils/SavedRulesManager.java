@@ -1,6 +1,7 @@
 package com.changethislater.emojify.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.changethislater.emojify.R;
 
@@ -77,7 +78,7 @@ public class SavedRulesManager {
 
     private void initializeFile(File file, Context context) throws IOException {
         context.openFileOutput(file.getName(), Context.MODE_PRIVATE)
-                .write("<?xml version=\"1.0\"?> <rules> </rules>".getBytes(StandardCharsets.UTF_8));
+                .write("<?xml version=\"1.0\"?> <rules></rules>".getBytes(StandardCharsets.UTF_8));
     }
 
     public void setSavedRulesXML(File savedRulesXML) {
@@ -92,7 +93,7 @@ public class SavedRulesManager {
         List<Rule> result = new ArrayList<>();
         Document doc = getFileContents(context);
         Element root = doc.getDocumentElement();
-
+        Log.d("thing",root.getTagName());
         NodeList nl = root.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
             Element ith = (Element)nl.item(i);
@@ -149,6 +150,7 @@ public class SavedRulesManager {
 
     private Document getFileContents(Context context) throws IOException, SAXException {
         FileInputStream fis = context.openFileInput(savedRulesXML.getName());
+        Log.d("getFileContents",savedRulesXML.getName());
         return builder.parse(fis);
     }
 }
